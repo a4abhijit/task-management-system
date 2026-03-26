@@ -1,0 +1,75 @@
+services:
+  postgres-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: taskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data 
+      - ./infra/db:/docker-entrypoint-initdb.d
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+  auth-service:
+    build: ./auth-service
+    env_file:
+      - ./auth-service/.env.docker
+    depends_on:
+      - postgres-db
+    ports:
+      - "4001:4001"
+
+  task-service:
+    build: ./task-service
+    env_file:
+      - ./task-service/.env.docker
+    depends_on:
+      - postgres-db
+      - kafka
+    ports:
+      - "4002:4002"
+
+  email-service:
+    build: ./email-service
+    env_file:
+      - ./email-service/.env
+    depends_on:
+      - kafka
+    ports:
+      - "4003:4003"
+
+  api-gateway:
+    build: ./api-gateway
+    env_file:
+      - ./api-gateway/.env.docker
+    depends_on:
+      - auth-service
+      - task-service
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "3001:80"
+
+volumes:
+  postgres-data: 
