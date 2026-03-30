@@ -8,7 +8,10 @@ require("dotenv").config();
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: [
+      "http://localhost:3001",
+      "http://task-frontend-abhi-123.s3-website.eu-north-1.amazonaws.com",
+    ],
     credentials: true,
   }),
 );
