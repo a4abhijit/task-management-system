@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
+app.use(cookieParser());
 app.use(
   cors({
     origin: [
@@ -15,7 +16,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(cookieParser());
+app.options("*", cors());
+
 
 app.use((req, res, next) => {
   console.log("Gateway hit:", req.method, req.url);

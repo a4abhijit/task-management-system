@@ -73,6 +73,8 @@ app.post("/login", async (req, res) => {
   });
   res.cookie("token", token, {
     httpOnly: true,
+    sameSite: "none", // 🔥 REQUIRED for cross-origin
+    secure: false, // true only when HTTPS (CloudFront later)
     maxAge: 60 * 60 * 1000,
   });
 
