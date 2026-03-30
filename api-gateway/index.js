@@ -9,10 +9,7 @@ const app = express();
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://task-frontend-abhi-123.s3-website.eu-north-1.amazonaws.com",
-    ],
+    origin: true, // allow all origins dynamically
     credentials: true,
   }),
 );
